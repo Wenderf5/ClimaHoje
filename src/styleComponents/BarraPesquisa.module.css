@@ -1,8 +1,10 @@
+*:focus {
+    outline: none;
+}
 
-
-.input{
+.input {
     border: none;
-    width: 220px;
+    width: 90%;
     height: 30px;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;

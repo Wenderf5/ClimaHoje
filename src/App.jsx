@@ -14,6 +14,8 @@ import { useEffect, useState } from "react";
 
 function App() {
 
+  const [Errocidade, setErrocidade] = useState(false);
+
   const [tempo1, setTempo1] = useState(null);
 
   const [Cidade, setCidade] = useState("");
@@ -36,27 +38,33 @@ function App() {
 
   function climaAgora() {
 
-    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${Pesquisa}&appid=${apikey}`, {
-      method: 'GET'
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setTemperatura(Math.round(data.main.temp - 273.15));
-        setTemperaturaMax(Math.round(data.main.temp_max - 273.15));
-        setTemperaturaMin(Math.round(data.main.temp_min - 273.15));
-        setHumidade(data.main.humidity);
-        setPressao(data.main.pressure);
-        setVlcVento(data.wind.speed);
-        setCidade(data.name);
-        if (data.weather[0].main == "Clouds") {
-          setTempo1(imgNublado)
-        } else if (data.weather[0].main == "Clear") {
-          setTempo1(imgEnsolarado)
-        } else if (data.weather[0].main == "Rain") {
-          setTempo1(imgChuva)
-        }
-        setPais(`https://flagsapi.com/${data.sys.country}/flat/32.png`);
+    if (Pesquisa !== null && Pesquisa !== undefined && Pesquisa !== "") {
+      fetch(`https://api.openweathermap.org/data/2.5/weather?q=${Pesquisa}&appid=${apikey}`, {
+        method: 'GET'
       })
+        .then((res) => res.json())
+        .then((data) => {
+          setTemperatura(Math.round(data.main.temp - 273.15));
+          setTemperaturaMax(Math.round(data.main.temp_max - 273.15));
+          setTemperaturaMin(Math.round(data.main.temp_min - 273.15));
+          setHumidade(data.main.humidity);
+          setPressao(data.main.pressure);
+          setVlcVento(data.wind.speed);
+          setCidade(data.name);
+          if (data.weather[0].main == "Clouds") {
+            setTempo1(imgNublado)
+          } else if (data.weather[0].main == "Clear") {
+            setTempo1(imgEnsolarado)
+          } else if (data.weather[0].main == "Rain") {
+            setTempo1(imgChuva)
+          }
+          setPais(`https://flagsapi.com/${data.sys.country}/flat/32.png`);
+          setErrocidade(false);
+        })
+        .catch((error) => {
+          setErrocidade(true);
+        });
+    }
   }
 
   const [latitude, setLatitude] = useState(null);
@@ -80,9 +88,6 @@ function App() {
       fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apikey}`)
         .then(response => response.json())
         .then(data => {
-
-          console.log(data)
-
           setTemperatura(Math.round(data.main.temp - 273.15));
           setTemperaturaMax(Math.round(data.main.temp_max - 273.15));
           setTemperaturaMin(Math.round(data.main.temp_min - 273.15));
@@ -103,20 +108,23 @@ function App() {
 
   }, [latitude, longitude])
 
-  
+
 
   return (
     <div>
       <div className={styleApp.blocoPrincipal}>
         <div className={styleApp.bloco1}>
-          <div style={{ width: "100%", height: "20%", borderTopLeftRadius: "30px", display: "flex", justifyContent: "center", alignItems: "center" }}><BarraPesquisa funcao={HandlePesquisa} pesquisa={climaAgora} /></div>
-          <div style={{ width: "100%", height: "10%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}><span>{Cidade}</span><span>&nbsp;</span><span>|</span><span>&nbsp;</span><span><img src={Pais} alt="" /></span></div>
+          <div className={styleApp.blocoBarraPesquisa}><BarraPesquisa funcao={HandlePesquisa} pesquisa={climaAgora} /></div>
+          {Errocidade && (
+            <div style={{ fontSize: "15px", color: "red", width: "100%", height: "5%", display: "flex", justifyContent: "center", alignItems: "center" }}>Cidade não encontrada</div>
+          )}
+          <div className={styleApp.cidade}>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}><span>{Cidade}</span><span>&nbsp;</span><span>|</span><span>&nbsp;</span><span><img src={Pais} alt="" /></span></div>
           </div>
-          <div style={{width: "100%", height: "30%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-            <div><span style={{ fontSize: "80px" }}>{Temperatura}</span><span><img className={styleApp.degreesCelsiusimg} src={degreesCelsius} alt="" /></span></div>
+          <div style={{ width: "100%", height: "30%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <div><span style={{ fontSize: "70px" }}>{Temperatura}</span><span><img className={styleApp.degreesCelsiusimg} src={degreesCelsius} alt="" /></span></div>
           </div>
-          <div style={{ width: "100%", height: "10%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div className={styleApp.Maxmin}>
             <div style={{ display: "flex", width: "100%", justifyContent: "space-around" }}>
               <div><span>Max:</span><span>&nbsp;</span><span>{TemperaturaMax}</span><span><img style={{ width: "15px" }} src={degreesCelsius} alt="" /></span></div>
               <div><span>Min:</span><span>&nbsp;</span><span>{TemperaturaMin}</span><span><img style={{ width: "15px" }} src={degreesCelsius} alt="" /></span></div>
@@ -124,19 +132,19 @@ function App() {
           </div>
         </div>
         <div className={styleApp.bloco2}>
-          <div style={{ width: "100%", height: "70%" }}>
-            <div style={{ width: "100%", height: "10%", display: "flex", alignItems: "center" }}>
-              <div style={{ marginLeft: "50px" }}>
-                <span style={{ fontSize: "24px" }}>Destaques de hoje</span>
+          <div className={styleApp.bloco3}>
+            <div className={styleApp.titulodestaques} >
+              <div className={styleApp.margin}>
+                <span >Destaques de hoje</span>
               </div>
             </div>
-            <div style={{ width: "100%", height: "90%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div className={styleApp.bloco4}>
               <div style={{ width: "98%", height: "95%", display: "flex" }}>
                 <div style={{ width: "50%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-around" }}>
                   <div className={styleApp.blocoDescricao}>
                     <div style={{ width: "100%", height: "30%", display: "flex", alignItems: "center" }}><span style={{ marginLeft: "10px" }}>Umidade</span></div>
                     <div style={{ width: "100%", height: "70%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      <div style={{ display: "flex", fontSize: "22px" }}>
+                      <div className={styleApp.txtdestaque}>
                         <span>{Humidade}</span>
                         <span>%</span>
                         <span>&nbsp;</span>
@@ -147,9 +155,9 @@ function App() {
                     </div>
                   </div>
                   <div className={styleApp.blocoDescricao}>
-                    <div style={{ width: "100%", height: "30%", display: "flex", alignItems: "center" }}><span style={{ marginLeft: "10px" }}>Velocidade do vento</span></div>
+                    <div style={{ width: "100%", height: "30%", display: "flex", alignItems: "center" }}><span style={{ marginLeft: "10px" }}>Vento</span></div>
                     <div style={{ width: "100%", height: "70%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      <div style={{ display: "flex", fontSize: "22px" }}>
+                      <div className={styleApp.txtdestaque}>
                         <span>{VlcVento}</span>
                         <span>m/s</span>
                         <span>&nbsp;</span>
@@ -163,7 +171,7 @@ function App() {
                   <div className={styleApp.blocoDescricao}>
                     <div style={{ width: "100%", height: "30%", display: "flex", alignItems: "center" }}><span style={{ marginLeft: "10px" }}>Pressão</span></div>
                     <div style={{ width: "100%", height: "70%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      <div style={{ display: "flex", fontSize: "22px" }}>
+                      <div className={styleApp.txtdestaque}>
                         <span>{Pressao}</span>
                         <span>&nbsp;</span>
                         <span>hPa</span>
@@ -177,7 +185,7 @@ function App() {
                   <div className={styleApp.blocoDescricao}>
                     <div style={{ width: "100%", height: "30%", display: "flex", alignItems: "center" }}><span style={{ marginLeft: "10px" }}>Nuvens</span></div>
                     <div style={{ width: "100%", height: "70%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      <div style={{ display: "flex", fontSize: "22px" }}>
+                      <div className={styleApp.txtdestaque}>
                         <div><img style={{ width: "62px" }} src={tempo1} alt="" /></div>
                       </div>
                     </div>
