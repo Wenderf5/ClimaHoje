@@ -1,3 +1,5 @@
+
+
 import styleApp from "./stylePages/App.module.css";
 
 import BarraPesquisa from "./components/BarraPesquisa";
@@ -34,12 +36,10 @@ function App() {
     setPesquisa(event.target.value);
   }
 
-  let apikey = "015d353fec5aba233c320e10ddd7aa86";
-
   function climaAgora() {
 
     if (Pesquisa !== null && Pesquisa !== undefined && Pesquisa !== "") {
-      fetch(`https://api.openweathermap.org/data/2.5/weather?q=${Pesquisa}&appid=${apikey}`, {
+      fetch(`https://api.openweathermap.org/data/2.5/weather?q=${Pesquisa}&appid=${import.meta.env.VITE_apikey}`, {
         method: 'GET'
       })
         .then((res) => res.json())
@@ -85,7 +85,7 @@ function App() {
 
     if (latitude !== null && longitude !== null) {
 
-      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apikey}`)
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${import.meta.env.VITE_apikey}`)
         .then(response => response.json())
         .then(data => {
           setTemperatura(Math.round(data.main.temp - 273.15));
